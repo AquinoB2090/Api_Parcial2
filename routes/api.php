@@ -17,10 +17,15 @@ Route::get('/prueba', function () {
     } catch (Throwable $exception) {
         report($exception);
 
-        return response()->json([
+        $response = [
             'ok' => false,
             'mensaje' => 'No se pudo conectar a Azure SQL.',
-            'error' => $exception->getMessage(),
-        ], 500);
+        ];
+
+        if (config('app.debug')) {
+            $response['error'] = $exception->getMessage();
+        }
+
+        return response()->json($response, 500);
     }
 });

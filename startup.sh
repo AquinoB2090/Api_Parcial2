@@ -10,11 +10,29 @@ NGINX_CONFIGS=(
 
 echo "Configuring Laravel for Azure App Service..."
 
+if [ -f "$APP_ROOT/default" ]; then
+    echo "Installing repository NGINX config"
+    cp "$APP_ROOT/default" /etc/nginx/sites-available/default
+else
+    for config in "${NGINX_CONFIGS[@]}"; do
+        if [ -f "$config" ]; then
+            echo "Updating $config"
+            sed -i -E "s#^[[:space:]]*root[[:space:]]+[^;]+;#        root $PUBLIC_ROOT;#g" "$config"
+            sed -i -E 's#^[[:space:]]*try_files[[:space:]].*;#            try_files $uri $uri/ /index.php?$args;#g' "$config"
+        fi
+    done
+fi
+
+if [ -L /etc/nginx/sites-enabled/default ]; then
+    ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+elif [ -f /etc/nginx/sites-enabled/default ]; then
+    cp /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+fi
+
 for config in "${NGINX_CONFIGS[@]}"; do
     if [ -f "$config" ]; then
-        echo "Updating $config"
-        sed -i -E "s#^[[:space:]]*root[[:space:]]+[^;]+;#        root $PUBLIC_ROOT;#g" "$config"
-        sed -i -E 's#^[[:space:]]*try_files[[:space:]].*;#            try_files $uri $uri/ /index.php?$args;#g' "$config"
+        echo "Active NGINX config in $config:"
+        grep -n "root\\|try_files" "$config" || true
     fi
 done
 

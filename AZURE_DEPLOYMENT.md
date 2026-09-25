@@ -7,10 +7,16 @@ Use Azure App Service on Linux with PHP 8.2 or newer.
 Set this startup command in the App Service configuration:
 
 ```bash
-bash /home/site/wwwroot/startup.sh
+cp /home/site/wwwroot/default /etc/nginx/sites-available/default && service nginx reload
 ```
 
-The script changes the NGINX site root to Laravel's `public/` directory and keeps Laravel routes working.
+This command copies the repository NGINX config, changes the site root to Laravel's `public/` directory, and keeps Laravel routes working.
+
+You can also use the included script if you want extra diagnostics:
+
+```bash
+bash /home/site/wwwroot/startup.sh
+```
 
 If Azure still shows `404 not found nginx`, open App Service > Advanced Tools > SSH and run:
 

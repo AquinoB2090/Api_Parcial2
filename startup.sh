@@ -1,16 +1,32 @@
 #!/usr/bin/env bash
 set -e
 
-NGINX_DEFAULT="/etc/nginx/sites-available/default"
+APP_ROOT="/home/site/wwwroot"
+PUBLIC_ROOT="$APP_ROOT/public"
+NGINX_CONFIGS=(
+    "/etc/nginx/sites-available/default"
+    "/etc/nginx/sites-enabled/default"
+)
 
-if [ -f "$NGINX_DEFAULT" ]; then
-    sed -i 's#/home/site/wwwroot;#/home/site/wwwroot/public;#g' "$NGINX_DEFAULT"
-    sed -i 's#try_files $uri $uri/ =404;#try_files $uri $uri/ /index.php?$args;#g' "$NGINX_DEFAULT"
-    service nginx reload
+echo "Configuring Laravel for Azure App Service..."
+
+for config in "${NGINX_CONFIGS[@]}"; do
+    if [ -f "$config" ]; then
+        echo "Updating $config"
+        sed -i -E "s#^[[:space:]]*root[[:space:]]+[^;]+;#        root $PUBLIC_ROOT;#g" "$config"
+        sed -i -E 's#^[[:space:]]*try_files[[:space:]].*;#            try_files $uri $uri/ /index.php?$args;#g' "$config"
+    fi
+done
+
+if command -v nginx >/dev/null 2>&1; then
+    nginx -t
 fi
 
-cd /home/site/wwwroot
+service nginx reload || nginx -s reload || true
+
+cd "$APP_ROOT"
 
 if [ -f artisan ]; then
+    php artisan route:clear || true
     php artisan config:cache || true
 fi

@@ -12,6 +12,20 @@ bash /home/site/wwwroot/startup.sh
 
 The script changes the NGINX site root to Laravel's `public/` directory and keeps Laravel routes working.
 
+If Azure still shows `404 not found nginx`, open App Service > Advanced Tools > SSH and run:
+
+```bash
+bash /home/site/wwwroot/startup.sh
+grep -n "root\\|try_files" /etc/nginx/sites-available/default
+```
+
+The output should show:
+
+```text
+root /home/site/wwwroot/public;
+try_files $uri $uri/ /index.php?$args;
+```
+
 ## Application settings
 
 Add these values in App Service > Settings > Environment variables:

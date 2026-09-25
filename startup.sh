@@ -13,6 +13,7 @@ echo "Configuring Laravel for Azure App Service..."
 if [ -f "$APP_ROOT/default" ]; then
     echo "Installing repository NGINX config"
     cp "$APP_ROOT/default" /etc/nginx/sites-available/default
+    cp "$APP_ROOT/default" /etc/nginx/sites-enabled/default
 else
     for config in "${NGINX_CONFIGS[@]}"; do
         if [ -f "$config" ]; then
@@ -40,7 +41,7 @@ if command -v nginx >/dev/null 2>&1; then
     nginx -t
 fi
 
-service nginx reload || nginx -s reload || true
+service nginx restart || nginx -s reload || true
 
 cd "$APP_ROOT"
 

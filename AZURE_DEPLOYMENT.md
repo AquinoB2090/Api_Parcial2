@@ -7,7 +7,7 @@ Use Azure App Service on Linux with PHP 8.2 or newer.
 Set this startup command in the App Service configuration:
 
 ```bash
-cp /home/site/wwwroot/default /etc/nginx/sites-available/default && service nginx reload
+cp /home/site/wwwroot/default /etc/nginx/sites-enabled/default && service nginx restart
 ```
 
 This command copies the repository NGINX config, changes the site root to Laravel's `public/` directory, and keeps Laravel routes working.

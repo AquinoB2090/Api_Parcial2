@@ -46,6 +46,11 @@ service nginx restart || nginx -s reload || true
 cd "$APP_ROOT"
 
 if [ -f artisan ]; then
+    mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache
+    chmod -R 775 storage bootstrap/cache || true
+    php artisan config:clear || true
     php artisan route:clear || true
+    php artisan view:clear || true
+    php artisan cache:clear || true
     php artisan config:cache || true
 fi

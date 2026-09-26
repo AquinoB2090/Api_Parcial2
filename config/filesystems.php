@@ -30,6 +30,12 @@ return [
 
     'disks' => [
 
+        'vehicle_photos' => [
+            'driver' => 'local',
+            'root' => env('VEHICLE_PHOTO_ROOT', storage_path('app/vehicle-photos')),
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

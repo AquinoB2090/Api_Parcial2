@@ -46,11 +46,20 @@ service nginx restart || nginx -s reload || true
 cd "$APP_ROOT"
 
 if [ -f artisan ]; then
+    chmod +x "$APP_ROOT/App_Data/jobs/continuous/subastas/run.sh"
+    export VEHICLE_PHOTO_ROOT="${VEHICLE_PHOTO_ROOT:-/home/data/vehicle-photos}"
+    mkdir -p "$VEHICLE_PHOTO_ROOT"
+    chmod 775 "$VEHICLE_PHOTO_ROOT"
     mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache
     chmod -R 775 storage bootstrap/cache || true
+    if id www-data >/dev/null 2>&1; then
+        chown -R www-data:www-data "$VEHICLE_PHOTO_ROOT" storage bootstrap/cache
+    fi
     php artisan config:clear || true
     php artisan route:clear || true
     php artisan view:clear || true
     php artisan cache:clear || true
-    php artisan config:cache || true
+    php artisan migrate --force
+    php artisan config:cache
+    php artisan route:cache
 fi

@@ -22,6 +22,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mbstring, pdo_sqlite, fileinfo
 
       - name: Check if composer.json exists
         id: check_files
@@ -31,14 +32,25 @@ jobs:
 
       - name: Run composer install if composer.json exists
         if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Test API with isolated SQLite database
+        run: php artisan test --compact
+
+      - name: Prepare production dependencies
+        run: composer install --no-dev --prefer-dist --no-progress --no-interaction --optimize-autoloader
+
+      - name: Package application with executable WebJob
+        run: |
+          chmod +x startup.sh scripts/deploy.sh App_Data/jobs/continuous/subastas/run.sh
+          zip -r app.zip . -x '.git/*' '.github/*' '.env*' 'tests/*' 'node_modules/*' 'storage/logs/*' 'storage/framework/cache/data/*' 'app.zip'
 
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: php-app
-          path: .
+          path: app.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,7 +64,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: php-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -66,5 +78,25 @@ jobs:
         with:
           app-name: 'ApiParcial'
           slot-name: 'Production'
-          package: .
-          
+          package: app.zip
+
+      - name: Configure persistent photos and startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_GROUP=$(az webapp list --query "[?name=='ApiParcial'].resourceGroup | [0]" -o tsv)
+          APP_HOST=$(az webapp show --resource-group "$APP_GROUP" --name ApiParcial --query defaultHostName -o tsv)
+          test -n "$APP_GROUP"
+          az webapp config appsettings set --resource-group "$APP_GROUP" --name ApiParcial --settings \
+            APP_ENV=production APP_DEBUG=false APP_URL="https://$APP_HOST" \
+            VEHICLE_PHOTO_ROOT=/home/data/vehicle-photos --output none
+          az webapp config set --resource-group "$APP_GROUP" --name ApiParcial \
+            --startup-file 'bash /home/site/wwwroot/startup.sh' --always-on true --output none
+
+      - name: Verify deployed API
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_GROUP=$(az webapp list --query "[?name=='ApiParcial'].resourceGroup | [0]" -o tsv)
+          APP_HOST=$(az webapp show --resource-group "$APP_GROUP" --name ApiParcial --query defaultHostName -o tsv)
+          curl --fail --retry 12 --retry-delay 5 --retry-all-errors "https://$APP_HOST/api/vehiculos?per_page=1"

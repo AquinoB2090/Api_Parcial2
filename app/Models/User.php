@@ -6,12 +6,22 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory;
+
+    protected $table = 'Usuarios';
+
+    protected $primaryKey = 'IdUsuario';
+
+    public $timestamps = false;
+
+    protected $authPasswordName = 'PasswordHash';
+
+    protected $rememberTokenName = '';
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +29,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'Nombre', 'Apellido', 'Correo', 'Telefono', 'PasswordHash', 'Rol', 'Activo', 'FechaRegistro',
     ];
 
     /**
@@ -30,8 +38,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'PasswordHash',
     ];
 
     /**
@@ -42,8 +49,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'FechaRegistro' => 'immutable_datetime',
+            'PasswordHash' => 'hashed',
+            'Activo' => 'boolean',
         ];
     }
 }

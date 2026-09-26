@@ -1,0 +1,619 @@
+{
+  "info": {
+    "name": "Subastas — Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Login guarda el token; crear vehículo y subasta guarda sus IDs. Cambiar correo/password para alternar entre los tres usuarios. Fotos se cargan con fotos[]."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "correo",
+      "value": "postor1@subastas.test"
+    },
+    {
+      "key": "password",
+      "value": "Postor123!"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "vehiculo_id",
+      "value": "1"
+    },
+    {
+      "key": "subasta_id",
+      "value": "1"
+    },
+    {
+      "key": "foto_id",
+      "value": "1"
+    },
+    {
+      "key": "notificacion_id",
+      "value": "1"
+    },
+    {
+      "key": "monto",
+      "value": "21000.00"
+    }
+  ],
+  "item": [
+    {
+      "name": "Registrar usuario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/register",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"María\",\n  \"apellido\": \"López\",\n  \"correo\": \"maria@example.test\",\n  \"telefono\": \"55551234\",\n  \"password\": \"Segura123!\",\n  \"password_confirmation\": \"Segura123!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Obtener token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/login",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"{{correo}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) pm.collectionVariables.set('token', pm.response.json().data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultar perfil",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/me",
+        "description": ""
+      }
+    },
+    {
+      "name": "Revocar token actual",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/auth/logout",
+        "description": ""
+      }
+    },
+    {
+      "name": "Consultar inventario",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "Crear borrador",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"anio\": 2020,\n  \"tipo_articulo\": \"Automóvil\",\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla\",\n  \"motor\": \"1.8\",\n  \"transmision\": \"Automática\",\n  \"tipo_combustible\": \"Gasolina\",\n  \"tren_manejo\": \"AWD\",\n  \"numero_cilindros\": 4,\n  \"estado_danio\": \"Verde\",\n  \"descripcion\": \"Vehículo de demostración\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) pm.collectionVariables.set('vehiculo_id', pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mis vehículos y borradores",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/mios",
+        "description": ""
+      }
+    },
+    {
+      "name": "Consultar ficha",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/{{vehiculo_id}}",
+        "description": ""
+      }
+    },
+    {
+      "name": "Editar publicación propia",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/{{vehiculo_id}}",
+        "description": "Antes del inicio y sin pujas. Solo cambia los campos enviados.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"descripcion\": \"Descripción actualizada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Dar de baja un borrador",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/{{vehiculo_id}}",
+        "description": ""
+      }
+    },
+    {
+      "name": "Obtener galería",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/{{vehiculo_id}}/fotos",
+        "description": ""
+      }
+    },
+    {
+      "name": "Cargar fotos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/{{vehiculo_id}}/fotos",
+        "description": "Solo propietario, antes del inicio. Máximo 20 fotografías por vehículo, 5 MB por archivo; JPG, PNG o WebP.",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "fotos[]",
+              "type": "file",
+              "src": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Eliminar foto",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/vehiculos/{{vehiculo_id}}/fotos/{{foto_id}}",
+        "description": "No permite dejar una publicación con menos de cinco fotos."
+      }
+    },
+    {
+      "name": "Listar subastas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "Publicar y programar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas",
+        "description": "Propietario del vehículo, ficha completa y al menos cinco fotos.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id_vehiculo\": {{vehiculo_id}},\n  \"monto_base\": \"20000.00\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_cierre\": \"{{fecha_cierre}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('fecha_inicio', new Date(Date.now()+120000).toISOString());",
+              "pm.collectionVariables.set('fecha_cierre', new Date(Date.now()+3600000).toISOString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code < 300) pm.collectionVariables.set('subasta_id', pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mis participaciones",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/mis-pujas",
+        "description": ""
+      }
+    },
+    {
+      "name": "Subastas ganadas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/ganadas",
+        "description": ""
+      }
+    },
+    {
+      "name": "Detalle de subasta",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/{{subasta_id}}",
+        "description": ""
+      }
+    },
+    {
+      "name": "Editar condiciones",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/{{subasta_id}}",
+        "description": "Antes del inicio y sin pujas.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"monto_base\": \"22000.00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Estado y situación personal",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/{{subasta_id}}/estado",
+        "description": ""
+      }
+    },
+    {
+      "name": "Oferta máxima y pujas propias",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/{{subasta_id}}/pujas",
+        "description": ""
+      }
+    },
+    {
+      "name": "Realizar oferta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/{{subasta_id}}/pujas",
+        "description": "Primera oferta > base. Siguientes >= actual × 1.10 redondeando hacia arriba al centavo. No permite pujas propias ni fuera de inicio <= ahora < cierre.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"monto\": \"{{monto}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Avisos propios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/notificaciones",
+        "description": ""
+      }
+    },
+    {
+      "name": "Marcar como leída",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/notificaciones/{{notificacion_id}}/leer",
+        "description": ""
+      }
+    },
+    {
+      "name": "Opciones de filtros",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/catalogos",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "Autorizar Pusher",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/broadcasting/auth",
+        "description": "Opcional. Requiere REALTIME_PUSHER_ENABLED=true y BROADCAST_CONNECTION=pusher; sin configurar devuelve 503.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"socket_id\": \"123.456\",\n  \"channel_name\": \"private-subastas.{{subasta_id}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Recibir eventos SSE",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "text/event-stream"
+          }
+        ],
+        "url": "{{base_url}}/api/subastas/{{subasta_id}}/eventos",
+        "description": "Stream autenticado de hasta 20 segundos; reconectar con Last-Event-ID. Siempre emite EstadoSincronizado, además de eventos nuevos y Reloj. Consulte docs/realtime-client.js."
+      }
+    },
+    {
+      "name": "Comprobar conexión SQL",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/prueba",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 <?php
 
+if (getenv('APP_ENV') !== 'local') {
+    http_response_code(404);
+    exit;
+}
+
 header('Content-Type: application/json');
 
 $root = dirname(__DIR__);

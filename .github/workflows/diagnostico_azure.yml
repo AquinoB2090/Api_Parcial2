@@ -1,0 +1,26 @@
+name: Diagnose Azure runtime
+on:
+  workflow_dispatch:
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_23259EB7AD2E4D59AFE1A0C195C71AC7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4D90C5673FA3436E9C903D48CAB5639A }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8629A7058E6A400392E7773E7D527335 }}
+      - name: Inspect runtime and filtered startup logs
+        shell: bash
+        run: |
+          set -euo pipefail
+          GROUP=$(az webapp list --query "[?name=='ApiParcial'].resourceGroup | [0]" -o tsv)
+          az webapp config show -g "$GROUP" -n ApiParcial --query '{alwaysOn:alwaysOn,runtime:linuxFxVersion,startup:appCommandLine}' -o json
+          az webapp webjob continuous list -g "$GROUP" -n ApiParcial --query '[].{name:name,status:status}' -o json || true
+          az webapp config appsettings list -g "$GROUP" -n ApiParcial -o json > /tmp/app-settings.json
+          az webapp log download -g "$GROUP" -n ApiParcial --log-file /tmp/app-logs.zip
+          python scripts/azure_log_summary.py /tmp/app-logs.zip /tmp/app-settings.json

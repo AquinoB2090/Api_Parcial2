@@ -1,5 +1,7 @@
 """Consulta GitHub usando el administrador de credenciales existente, sin imprimir secretos."""
 import io, json, os, re, subprocess, sys, urllib.request, urllib.error, zipfile
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
@@ -27,6 +29,9 @@ try:
         logs = zipfile.ZipFile(io.BytesIO(raw))
         for name in logs.namelist():
             content = logs.read(name).decode('utf-8', errors='replace')
+            if '--diagnostic' in sys.argv and 'Inspect runtime' in name:
+                print('\n'.join(line for line in content.splitlines() if 'ContainerStatus' not in line and '2026-09-25' not in line)[-28000:])
+                continue
             hosts = sorted(set(re.findall(r'https://[a-zA-Z0-9.-]+\.azurewebsites\.net', content)))
             errors = [line for line in content.splitlines() if '##[error]' in line]
             if hosts or errors:

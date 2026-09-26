@@ -10,7 +10,7 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
     names = sorted(n for n in archive.namelist() if n.endswith('.log'))[-20:]
     for name in names:
         lines = archive.read(name).decode('utf-8', errors='replace').splitlines()
-        errors = []
+        errors = lines[-120:] if 'default_docker.log' in name else []
         for i, line in enumerate(lines):
             if re.search(r'(SQLSTATE|Exception|Fatal|ERROR|error:|failed|could not|not found|migrat|Configuring Laravel|php-fpm)', line, re.I):
                 errors.extend(lines[max(0, i-1):i+3])

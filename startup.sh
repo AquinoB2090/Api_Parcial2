@@ -63,3 +63,7 @@ if [ -f artisan ]; then
     php artisan config:cache
     php artisan route:cache
 fi
+
+# El comando personalizado reemplaza el arranque predeterminado de Oryx.
+# Mantener PHP-FPM en primer plano para atender las solicitudes de Nginx.
+exec php-fpm -F

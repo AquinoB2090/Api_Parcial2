@@ -41,7 +41,8 @@ def request(method, path, data=None, token=None, expected=200, content_type='app
         raw = response.read()
         if response.status != expected:
             # No incluir cuerpos que pudieran contener tokens o datos de la configuración.
-            raise AssertionError(f'{method} {path}: HTTP {response.status}, esperado {expected}')
+            problem = json.loads(raw).get('error', {}) if 'json' in response.headers.get('Content-Type', '') else {}
+            raise AssertionError(f'{method} {path}: HTTP {response.status}, esperado {expected}; {problem.get("codigo", "")} {problem.get("mensaje", "")}')
         return json.loads(raw) if raw and 'json' in response.headers.get('Content-Type', '') else raw
 
 
@@ -102,8 +103,8 @@ try:
         vehicles.append(vehicle)
         fixture('status', vehicle)  # Comprueba que la base local sea la de la API desplegada.
         photos[vehicle] = request('POST', f'/api/vehiculos/{vehicle}/fotos', body, tokens[0], 201, 'multipart/form-data; boundary=' + boundary)['data']
-    start = time.time() + 8
-    end = start + 32
+    start = time.time() + 40
+    end = start + 65
     iso = lambda stamp: dt.datetime.fromtimestamp(stamp, dt.timezone.utc).isoformat()
     for vehicle in vehicles:
         auction = request('POST', '/api/subastas', {'id_vehiculo': vehicle, 'monto_base': '20000.00', 'fecha_inicio': iso(start), 'fecha_cierre': iso(end)}, tokens[0], 201)['data']['id']
@@ -111,6 +112,7 @@ try:
     photo_path = urlsplit(photos[vehicles[0]][0]['url']).path
     assert request('GET', photo_path).startswith(b'\x89PNG')
     print('Creación, cinco fotos por vehículo, lectura pública y programación: OK', flush=True)
+    pause_until(start + 1)
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         streams = [executor.submit(stream, token, auctions[0]) for token in tokens[1:]]
         pause_until(start + 1)

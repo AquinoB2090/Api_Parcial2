@@ -2,6 +2,8 @@
 
 Importar [Postman](Subastas.postman_collection.json) o [OpenAPI](../public/openapi.json). Todas las solicitudes JSON deben usar `Accept: application/json`; las protegidas además usan `Authorization: Bearer <token>`. El registro crea una cuenta; el login entrega el token.
 
+URL base de Azure: `https://apiparcial-cyd3e7byc2fwhyf0.westus3-01.azurewebsites.net`. En Postman, asignarla a `baseUrl` para probar la versión publicada.
+
 **Ejemplo de login**
 
 ```http

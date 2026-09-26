@@ -14,6 +14,7 @@ class VehiculoResource extends JsonResource
             'modelo' => $this->Modelo, 'motor' => $this->Motor, 'transmision' => $this->Transmision, 'tipo_combustible' => $this->TipoCombustible,
             'tren_manejo' => $this->TrenManejo, 'numero_cilindros' => $this->NumeroCilindros, 'estado_danio' => $this->EstadoDanio,
             'descripcion' => $this->Descripcion, 'activo' => $this->Activo,
+            'es_mio' => $request->user()?->IdUsuario === $this->IdUsuario,
             'fotos' => FotoResource::collection($this->whenLoaded('fotos'))];
         if ($this->resource->relationLoaded('subasta')) {
             $data['subasta'] = $this->subasta ? app(AuctionService::class)->snapshot($this->subasta, $request->user()) : null;

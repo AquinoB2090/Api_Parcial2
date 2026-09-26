@@ -7,8 +7,12 @@
   },
   "servers": [
     {
+      "url": "https://apiparcial-cyd3e7byc2fwhyf0.westus3-01.azurewebsites.net",
+      "description": "API publicada en Azure App Service"
+    },
+    {
       "url": "http://localhost:8000",
-      "description": "Desarrollo; sustituir por la URL del App Service"
+      "description": "Desarrollo local"
     }
   ],
   "security": [
